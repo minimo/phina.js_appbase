@@ -1,94 +1,69 @@
 phina.namespace(function() {
-  phina.define('phina.asset.AssetLoader', {
-    superClass: "phina.util.EventDispatcher",
+
+  /**
+   * @class phina.asset.Font
+   * 
+   */
+  phina.define("phina.asset.Font", {
+    superClass: "phina.asset.Asset",
 
     /**
      * @constructor
      */
-    init: function(params) {
+    init: function() {
       this.superInit();
-
-      params = (params || {}).$safe({
-        cache: true,
-      });
-
-      this.assets = {};
-      this.cache = params.cache;
     },
 
-    load: function(params) {
-      var self = this;
-      var flows = [];
+    load: function(key, path) {
+      this.src = path;
+      this.key = key;
 
-      params.forIn(function(type, assets) {
-        assets.forIn(function(key, value) {
-          var func = phina.asset.AssetLoader.assetLoadFunctions[type];
-          var flow = func(value);
-          flow.then(function(asset) {
-            if (self.cache) {
-              phina.asset.AssetManager.set(type, key, asset);
-            }
-          });
-          flows.push(flow);
-        });
-      });
-
-      return phina.util.Flow.all(flows).then(function(args) {
-      });
-    },
-
-    _static: {
-      assetLoadFunctions: {
-        image: function(path) {
-          var texture = phina.asset.Texture();
-          var flow = texture.load(path);
-          return flow;
-        },
-        sound: function(path) {
-          var sound = phina.asset.Sound();
-          var flow = audio.load(path);
-          return flow;
-        },
-        spritesheet: function(path) {
-          var ss = phina.asset.SpriteSheet();
-          var flow = ss.load(path);
-          return flow;
-        },
-        script: function(path) {
-          var script = phina.asset.Script();
-          return script.load(path);
-        },
-        font: function(path) {
-          var font = phina.asset.Font();
-          return font.load(path);
-        },
+      var reg = /(.*)(?:\.([^.]+$))/;
+      var type = path.match(reg)[2];
+      var format = "unknown";
+      switch (type) {
+        case "ttf":
+            format = "truetype"; break;
+        case "otf":
+            format = "opentype"; break;
+        case "woff":
+            format = "woff"; break;
+        case "woff2":
+            format = "woff2"; break;
+        default:
+            console.warn("サポートしていないフォント形式です。(" + path + ")");
       }
-    }
+      this.format = format;
 
-  });
-});
+      if (format !== "unknown") {
+        var text = "@font-face { font-family: '{0}'; src: url({1}) format('{2}'); }".format(key, path, format);
+        var e = document.querySelector("head");
+        var fontFaceStyleElement = document.createElement("style");
+        if (fontFaceStyleElement.innerText) {
+          fontFaceStyleElement.innerText = text;
+        } else {
+          fontFaceStyleElement.textContent = text;
+        }
+        e.appendChild(fontFaceStyleElement);
+      }
 
-phina.namespace(function() {
-  phina.define("phina.asset.Font", {
-    superClass: "phina.asset.Asset",
-
-    init: function(path) {
-      this.superInit();
-
-      var fontFaceStyleElement = tm.dom.Element("head").create("style");
-      fontFaceStyleElement.text = "@font-face { font-family: '{0}'; src: url({1}) format('{2}'); }".format(key, path, format);
+      return phina.util.Flow(this._load.bind(this));
     },
 
     _load: function(resolve) {
-      var self = this;
-      this.checkLoaded(key, function() {
-        self.loaded = true;
-        resolve(self);
-      }.bind(this));
+      if (this.format !== "unknown") {
+        this.checkLoaded(this.key, function() {
+          this.loaded = true;
+          resolve(this);
+        }.bind(this));
+      } else {
+        this.loaded = true;
+        resolve(this);
+      }
     },
 
-    checkLoaded = function (font, callback) {
-      var canvas = tm.graphics.Canvas();
+    checkLoaded: function (font, callback) {
+      var canvas = phina.graphics.Canvas();
       var DEFAULT_FONT = canvas.context.font.split(' ')[1];
       canvas.context.font = '40px ' + DEFAULT_FONT;
 
@@ -101,24 +76,10 @@ phina.namespace(function() {
         if (canvas.context.measureText(checkText).width !== before) {
           callback && callback();
         } else {
-        setTimeout(checkLoadFont, 100);
+          setTimeout(checkLoadFont, 100);
         }
       };
       setTimeout(checkLoadFont, 100);
     },
   });
 });
-
-  tm.asset.Loader.register("ttf", function(path, key) {
-    return tm.asset.Font(path, key, "truetype");
-  });
-  tm.asset.Loader.register("otf", function(path, key) {
-    return tm.asset.Font(path, key, "opentype");
-  });
-  tm.asset.Loader.register("woff", function(path, key) {
-    return tm.asset.Font(path, key, "woff");
-  });
-  tm.asset.Loader.register("woff2", function(path, key) {
-    return tm.asset.Font(path, key, "woff2");
-  });
-

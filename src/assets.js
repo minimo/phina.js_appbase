@@ -12,9 +12,8 @@ assets["IPL"] = {
     image: {
         "hiyoko":   "assets/hiyoco_nomal_full.png",
     },
-/*
     font: {
-        "UbuntuMono":   "font/UbuntuMono-Bold.ttf",
+        "UbuntuMono":       "font/UbuntuMono-Bold.ttf",
+        "Orbitron-Regular": "font/Orbitron-Regular.ttf",
     }
-*/
 };
