@@ -1119,6 +1119,8 @@ phina.namespace(function() {
 
     return _class;
   });
+  
+  var _classDefinedCallback = {};
 
   /**
    * @member phina
@@ -1129,7 +1131,20 @@ phina.namespace(function() {
   phina.method('define', function(path, params) {
     if (params.superClass) {
       if (typeof params.superClass === 'string') {
-        params.superClass = phina.using(params.superClass);
+        var _superClass = phina.using(params.superClass);
+        if (typeof _superClass != 'function') {
+          if (_classDefinedCallback[params.superClass] == null) {
+            _classDefinedCallback[params.superClass] = [];
+          }
+          _classDefinedCallback[params.superClass].push(function() {
+            phina.define(path, params);
+          });
+
+          return ;
+        }
+        else {
+          params.superClass = _superClass;
+        }
       }
       else {
         params.superClass = params.superClass;
@@ -1144,6 +1159,13 @@ phina.namespace(function() {
     });
 
     phina.register(path, _class);
+    
+    if (_classDefinedCallback[path]) {
+      _classDefinedCallback[path].forEach(function(callback) {
+        callback();
+      });
+      _classDefinedCallback[path] = null;
+    }
 
     return _class;
   });
@@ -2655,7 +2677,7 @@ phina.namespace(function() {
       params.forIn(function(type, assets) {
         assets.forIn(function(key, value) {
           var func = phina.asset.AssetLoader.assetLoadFunctions[type];
-          var flow = func(value);
+          var flow = func(key, value);
           flow.then(function(asset) {
             if (self.cache) {
               phina.asset.AssetManager.set(type, key, asset);
@@ -2671,24 +2693,28 @@ phina.namespace(function() {
 
     _static: {
       assetLoadFunctions: {
-        image: function(path) {
+        image: function(key, path) {
           var texture = phina.asset.Texture();
           var flow = texture.load(path);
           return flow;
         },
-        sound: function(path) {
+        sound: function(key, path) {
           var sound = phina.asset.Sound();
-          var flow = audio.load(path);
+          var flow = sound.load(path);
           return flow;
         },
-        spritesheet: function(path) {
+        spritesheet: function(key, path) {
           var ss = phina.asset.SpriteSheet();
           var flow = ss.load(path);
           return flow;
         },
-        script: function(path) {
+        script: function(key, path) {
           var script = phina.asset.Script();
           return script.load(path);
+        },
+        font: function(key, path) {
+          var font = phina.asset.Font();
+          return font.load(key, path);
         },
       }
     }
@@ -3102,6 +3128,92 @@ phina.namespace(function() {
 
 });
 
+
+phina.namespace(function() {
+
+  /**
+   * @class phina.asset.Font
+   * 
+   */
+  phina.define("phina.asset.Font", {
+    superClass: "phina.asset.Asset",
+
+    /**
+     * @constructor
+     */
+    init: function() {
+      this.superInit();
+    },
+
+    load: function(key, path) {
+      this.src = path;
+      this.key = key;
+
+      var reg = /(.*)(?:\.([^.]+$))/;
+      var type = path.match(reg)[2];
+      var format = "unknown";
+      switch (type) {
+        case "ttf":
+            format = "truetype"; break;
+        case "otf":
+            format = "opentype"; break;
+        case "woff":
+            format = "woff"; break;
+        case "woff2":
+            format = "woff2"; break;
+        default:
+            console.warn("サポートしていないフォント形式です。(" + path + ")");
+      }
+      this.format = format;
+
+      if (format !== "unknown") {
+        var text = "@font-face { font-family: '{0}'; src: url({1}) format('{2}'); }".format(key, path, format);
+        var e = document.querySelector("head");
+        var fontFaceStyleElement = document.createElement("style");
+        if (fontFaceStyleElement.innerText) {
+          fontFaceStyleElement.innerText = text;
+        } else {
+          fontFaceStyleElement.textContent = text;
+        }
+        e.appendChild(fontFaceStyleElement);
+      }
+
+      return phina.util.Flow(this._load.bind(this));
+    },
+
+    _load: function(resolve) {
+      if (this.format !== "unknown") {
+        this.checkLoaded(this.key, function() {
+          this.loaded = true;
+          resolve(this);
+        }.bind(this));
+      } else {
+        this.loaded = true;
+        resolve(this);
+      }
+    },
+
+    checkLoaded: function (font, callback) {
+      var canvas = phina.graphics.Canvas();
+      var DEFAULT_FONT = canvas.context.font.split(' ')[1];
+      canvas.context.font = '40px ' + DEFAULT_FONT;
+
+      var checkText = "1234567890-^\\qwertyuiop@[asdfghjkl;:]zxcvbnm,./\!\"#$%&'()=~|QWERTYUIOP`{ASDFGHJKL+*}ZXCVBNM<>?_１２３４５６７８９０－＾￥ｑｗｅｒｔｙｕｉｏｐａｓｄｆｇｈｊｋｌｚｘｃｖｂｎｍ，．あいうかさたなをん時は金なり";
+
+      var before = canvas.context.measureText(checkText).width;
+      canvas.context.font = '40px ' + font + ', ' + DEFAULT_FONT;
+
+      var checkLoadFont = function () {
+        if (canvas.context.measureText(checkText).width !== before) {
+          callback && callback();
+        } else {
+          setTimeout(checkLoadFont, 100);
+        }
+      };
+      setTimeout(checkLoadFont, 100);
+    },
+  });
+});
 
 
 ;(function() {
@@ -3792,6 +3904,7 @@ phina.namespace(function() {
           this.enableStats();
         }.bind(this);
       }
+      return this;
     },
 
     _loop: function() {
@@ -4619,6 +4732,20 @@ phina.namespace(function() {
      */
     clear: function() {
       this._init();
+      return this;
+    },
+
+    fromJSON: function(json) {
+      if (json.loop !== undefined) {
+        this.setLoop(json.loop);
+      }
+
+      json.tweens.each(function(t) {
+        var t = t.clone();
+        var method = t.shift();
+        this[method].apply(this, t);
+      }, this);
+
       return this;
     },
 
@@ -5836,7 +5963,7 @@ phina.namespace(function() {
 
     init: function(text, style) {
 
-      this.text = text || 'hoge\nfoo\nbar';
+      this.text = text || 'hoge';
       style = (style || {}).$safe({
         color: 'black',
 
@@ -5887,7 +6014,7 @@ phina.namespace(function() {
 
       var fontSize = this.style.fontSize;
       var font = "{fontWeight} {fontSize}px {fontFamily}".format(this.style);
-      var lines = this.text.split('\n');
+      var lines = this._lines;
       canvas.context.font = font;
 
       canvas.width = this.calcWidth() + style.padding*2;
@@ -5930,7 +6057,7 @@ phina.namespace(function() {
         },
         set: function(v) {
           this._text = v;
-          this._lines = v.split('\n');
+          this._lines = (v+'').split('\n');
           if (this.canvas) {
             this._render();
           }
@@ -6258,7 +6385,11 @@ phina.namespace(function() {
     },
 
     _draw: function() {
-      this.canvas.clearColor(this.backgroundColor);
+      if (this.backgroundColor) {
+        this.canvas.clearColor(this.backgroundColor);
+      } else {
+        this.canvas.clear();
+      }
 
       if (this.currentScene.canvas) {
         this.currentScene._render();
@@ -6745,7 +6876,7 @@ phina.namespace(function() {
           text: params.message,
           hashtags: params.hashtags,
         });
-        window.open(url);
+        window.open(url, 'share window', 'width=480, height=320');
       };
     },
 
@@ -6755,7 +6886,7 @@ phina.namespace(function() {
 
         message: 'this is phina.js project.\n',
         hashtags: 'phina,game,javascript',
-        url: location.href,
+        url: phina.global.location && phina.global.location.href,
 
         width: 640,
         height: 960,
@@ -6763,6 +6894,108 @@ phina.namespace(function() {
         fontColor: 'white',
         backgroundColor: 'hsl(200, 80%, 64%)',
         backgroundImage: '',
+      },
+    },
+
+  });
+
+});
+
+/*
+ * CountScene
+ */
+
+
+phina.namespace(function() {
+
+  /**
+   * @class phina.game.CountScene
+   * 
+   */
+  phina.define('phina.game.CountScene', {
+    superClass: 'phina.display.CanvasScene',
+    /**
+     * @constructor
+     */
+    init: function(options) {
+      this.superInit(options);
+
+      options = (options || {}).$safe(phina.game.CountScene.defaults);
+
+      this.backgroundColor = options.backgroundColor;
+
+      this.fromJSON({
+        children: {
+          label: {
+            className: 'phina.display.Label',
+            arguments: ['', {
+              color: 'white',
+              fontSize: options.fontSize,
+            }],
+            x: this.gridX.center(),
+            y: this.gridY.center(),
+          },
+        }
+      });
+
+      if (options.count instanceof Array) {
+        this.countList = options.count.reverse();
+      }
+      else {
+        this.countList = Array.range(1, options.count+1);
+      }
+      this.counter = this.countList.length;
+      this.exitType = options.exitType;
+
+      this._updateCount();
+    },
+
+    _updateCount: function() {
+      var endFlag = this.counter <= 0;
+      var index = --this.counter;
+
+      this.label.text = this.countList[index];
+
+      this.label.scale.set(1, 1);
+      this.label.tweener
+        .clear()
+        .to({
+          scaleX: 1,
+          scaleY: 1,
+          alpha: 1,
+        }, 250)
+        .wait(500)
+        .to({
+          scaleX: 1.5,
+          scaleY: 1.5,
+          alpha: 0.0
+        }, 250)
+        .call(function() {
+          if (this.counter <= 0) {
+            this.flare('finish');
+            if (this.exitType === 'auto') {
+              this.app.popScene();
+            }
+          }
+          else {
+            this._updateCount();
+          }
+        }, this);
+    },
+
+
+    _static: {
+      defaults: {
+        count: 3,
+
+        width: 640,
+        height: 960,
+
+        fontColor: 'white',
+        fontSize: 192,
+        backgroundColor: '#444',
+
+        exitType: 'auto',
       },
     },
 
@@ -6950,7 +7183,7 @@ phina.namespace(function() {
         screen_name: 'phi_jp',
         hashtags: 'javascript,phina',
         // url: 'http://github.com/phi-jp/phina.js',
-        url: location.href,
+        url: phina.global.location && phina.global.location.href,
         via: 'phi_jp',
       },
 

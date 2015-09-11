@@ -27,6 +27,7 @@ phina.define("phinaApp.Application", {
 
     init: function(param) {
         this.superInit(param);
+        this.$extend(this._static);
 
         //設定情報の読み込み
         this.loadConfig();
@@ -43,6 +44,9 @@ phina.define("phinaApp.Application", {
     //設定データの読み込み
     loadConfig: function() {
         return this;
+    },
+
+    playBGM: function(asset) {
     },
 
     _accessor: {
