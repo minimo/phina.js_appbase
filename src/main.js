@@ -12,8 +12,8 @@
 DEBUG = false;
 
 //スクリーンサイズ
-var SC_W = 640;
-var SC_H = 960;
+var SC_W = 320;
+var SC_H = 640;
 
 //マップパネル数
 MAP_W = 5;

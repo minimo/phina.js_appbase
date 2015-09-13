@@ -31,7 +31,7 @@ phina.define("phinaApp.MainScene", {
         startPattern: 0,
 
         //状態フラグ
-        ready: false,   //準備ＯＫ
+        ready: true,   //準備ＯＫ
         start: false,   //ゲームスタート
         stop: false,
 
@@ -66,7 +66,16 @@ phina.define("phinaApp.MainScene", {
         this.$extend(this._static);
 
         //バックグラウンド
-        this.bg = phina.display.Sprite("bg", SC_W*2, SC_H*2).addChildTo(this);
+        var param = {
+            width:SC_W,
+            height:SC_H,
+            color: 'black',
+            stroke: false,
+            backgroundColor: 'transparent',
+        };
+        this.bg = phina.display.RectangleShape(param)
+            .addChildTo(this)
+            .setPosition(SC_W*0.5, SC_H*0.5)
 
         //レイヤー準備
         this.lowerLayer = phina.app.Object2D().addChildTo(this);
@@ -80,11 +89,6 @@ phina.define("phinaApp.MainScene", {
             .setPosition(PN_OFFX, PN_OFFY);
         this.player.visible = false;
 
-        //ステージ開始時演出用
-        this.egg = phinaApp.Egg();
-        this.egg.player = this.player;
-        this.egg.setPosition(PN_OFFX, PN_OFFY);
-
         //スコア表示
         var that = this;
         var lb = this.scoreLabel = phina.display.Label("得点:", this.labelParam)
@@ -95,9 +99,9 @@ phina.define("phinaApp.MainScene", {
         }
 
         //目隠し
-        this.mask = phina.display.Sprite("bg", SC_W*2, SC_H*2).addChildTo(this);
-
-        var a = app;
+        this.mask = phina.display.RectangleShape(param)
+//            .addChildTo(this)
+            .setPosition(SC_W*0.5, SC_H*0.5)
     },
     
     update: function(app) {
@@ -108,7 +112,7 @@ phina.define("phinaApp.MainScene", {
             this.start = false;
             this.stop = false;
 
-            this.mask.tweener.clear().fadeOut(300);
+            this.mask.tweener.clear().to({alpha: 0},300);
         }
         if (!this.start || this.stop) return;
 
@@ -124,7 +128,7 @@ phina.define("phinaApp.MainScene", {
 
         if (!this.retryStage) {
             app.playBGM("bgm"+this.stageNumber);
-            app.pushScene(phinaApp.TutorialScene(this.stageNumber));
+//            app.pushScene(phinaApp.TutorialScene(this.stageNumber));
         }
 
         //フラグ初期化
@@ -197,11 +201,12 @@ phina.define("phinaApp.MainScene", {
         this.player.startup();
 
         //スタート演出初期化
-        this.egg.addChildTo(this.playerLayer);
+        //ステージ開始時演出用
+        this.egg = phinaApp.Egg()
+            .setPosition(sx, sy)
+            .addChildTo(this.playerLayer);
+        this.egg.player = this.player;
         this.egg.scaleX = -1;
-        this.egg.setPosition(sx, sy);
-        this.egg.anim.gotoAndPlay("enter");
-        this.egg.startup();
 
         //ゴール準備
         if (!this.endless) {
@@ -211,23 +216,21 @@ phina.define("phinaApp.MainScene", {
 
         //スタートメッセージ
         var that = this;
-        var lb = phina.display.OutlineLabel("３", 30).addChildTo(this);
+        var lb = phina.display.Label("３", this.labelParam).addChildTo(this);
         lb.setPosition(SC_W/2, -SC_H/2);
-        lb.alpha = 0;
         lb.fontFamily = "KS-Kohichi";
         lb.align     = "center";
         lb.baseline  = "middle";
         lb.fontSize = 60;
-        lb.outlineWidth = 2;
         lb.tweener.clear();
         lb.tweener.wait(600);
-        lb.tweener.call(function(){lb.text = "３";}).to({x: SC_W/2, y: -SC_H/2}, 1).fadeIn(1).move(SC_W/2, SC_H/2, 600, "easeOutBounce").wait(100).fadeOut(100);
-        lb.tweener.call(function(){lb.text = "２";}).to({x: SC_W/2, y: -SC_H/2}, 1).fadeIn(1).move(SC_W/2, SC_H/2, 600, "easeOutBounce").wait(100).fadeOut(100);
-        lb.tweener.call(function(){lb.text = "１";}).to({x: SC_W/2, y: -SC_H/2}, 1).fadeIn(1).move(SC_W/2, SC_H/2, 600, "easeOutBounce").wait(100).fadeOut(100);
-        lb.tweener.call(function(){lb.text = "スタート！";}).to({x: SC_W/2, y: -SC_H/2}, 1).fadeIn(1).move(SC_W/2, SC_H/2, 700, "easeOutBounce");
+        lb.tweener.call(function(){lb.text = "３";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
+        lb.tweener.call(function(){lb.text = "２";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
+        lb.tweener.call(function(){lb.text = "１";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
+        lb.tweener.call(function(){lb.text = "スタート！";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
         lb.tweener.call(function(){that.start = true;});
         lb.tweener.wait(200);
-        lb.tweener.move(SC_W/2, SC_H/2, 500, "easeOutQuint").fadeOut(200).call(function(){lb.remove();});
+        lb.tweener.to({x: SC_W/2, y: SC_H/2}, 500, "easeOutQuint").to({alpha:0}, 200).call(function(){lb.remove();});
     },
 
     //ステージ再スタート

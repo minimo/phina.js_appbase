@@ -49,6 +49,14 @@ phina.define("phinaApp.Application", {
     playBGM: function(asset) {
     },
 
+    setVolumeBGM: function(vol) {
+
+    },
+
+    setVolumeSE: function(vol) {
+
+    },
+
     _accessor: {
         volumeBGM: {
             "get": function() { return this.sounds.volumeBGM; },

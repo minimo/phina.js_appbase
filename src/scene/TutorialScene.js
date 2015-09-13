@@ -10,8 +10,8 @@ phina.define("phinaApp.TutorialScene", {
     superClass: phina.app.Scene,
     
     _static: {
-        this.page: 0,
-        this.maxPage: 1,
+        page: 0,
+        maxPage: 1,
 
         //ラベル用パラメータ
         labelParam: {fontFamily: "KS-Kohichi", align: "left", baseline: "middle", fontSize: 20},
@@ -81,7 +81,6 @@ phina.define("phinaApp.TutorialScene", {
         if (this.page == this.maxPage) {
             app.popScene();
         } else {
-//            this.panels[this.page].setPosition(SC_W/2, SC_H/2);
             this.panels[this.page].tweener.to({x: SC_W/2, y: SC_H/2}, 1000,"easeOutElastic");
         }
     },
