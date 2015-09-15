@@ -100,7 +100,7 @@ phina.define("phinaApp.MainScene", {
 
         //目隠し
         this.mask = phina.display.RectangleShape(param)
-//            .addChildTo(this)
+            .addChildTo(this)
             .setPosition(SC_W*0.5, SC_H*0.5)
     },
     
@@ -131,10 +131,6 @@ phina.define("phinaApp.MainScene", {
 //            app.pushScene(phinaApp.TutorialScene(this.stageNumber));
         }
 
-        //フラグ初期化
-        this.ready = true;
-        this.start = false;
-        
         //通過パネル数初期化
         this.passPanel = 0;
 
@@ -216,7 +212,7 @@ phina.define("phinaApp.MainScene", {
 
         //スタートメッセージ
         var that = this;
-        var lb = phina.display.Label("３", this.labelParam).addChildTo(this);
+        var lb = phina.display.Label("３", {fontSize: 128, fontFamily: "Azuki"}).addChildTo(this);
         lb.setPosition(SC_W/2, -SC_H/2);
         lb.fontFamily = "KS-Kohichi";
         lb.align     = "center";
@@ -329,7 +325,7 @@ phina.define("phinaApp.MainScene", {
 
         if (point > 0) {
             this.score += point;
-            var lb = phina.display.OutlineLabel(""+point, 30).addChildTo(this.itemLayer);
+            var lb = phina.display.Label(""+point, {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this.itemLayer);
             lb.setPosition(p.x, p.y-30);
             lb.fontFamily = "KS-Kohichi";
             lb.align     = "center";
@@ -471,7 +467,7 @@ phina.define("phinaApp.MainScene", {
             player.action("miss");
             this.stop = true;
             var that = this;
-            var lb = phina.display.OutlineLabel("ミス！！", 30).addChildTo(this);
+            var lb = phina.display.Label("ミス！！", {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this);
             lb.setPosition(SC_W/2, -SC_H/2);
             lb.fontFamily = "KS-Kohichi";
             lb.align     = "center";
@@ -492,7 +488,7 @@ phina.define("phinaApp.MainScene", {
             player.action("goal");
             this.stop = true;
             var that = this;
-            var lb = phina.display.OutlineLabel("ゴール！！", 30).addChildTo(this);
+            var lb = phina.display.Label("ゴール！！", {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this);
             lb.setPosition(SC_W/2, -SC_H/2);
             lb.fontFamily = "KS-Kohichi";
             lb.align     = "center";

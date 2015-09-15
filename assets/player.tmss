@@ -19,6 +19,7 @@
         },
         "miss": {
             "frames":[4,5],
+            "next": "stop",
             "frequency": 23
         },
         "move": {

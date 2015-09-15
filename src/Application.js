@@ -53,6 +53,9 @@ phina.define("phinaApp.Application", {
 
     },
 
+    playSE: function(asset) {
+    },
+
     setVolumeSE: function(vol) {
 
     },
