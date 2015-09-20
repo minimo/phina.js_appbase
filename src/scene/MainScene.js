@@ -461,20 +461,16 @@ phina.define("phinaApp.MainScene", {
 
                     //スタート地点用パネル
                     case 8:
-                        player.tweener.clear();
-                        player.tweener.moveBy(dis, 0, spd)
+                        player.tweener.clear().moveBy(dis, 0, spd)
                         break;
                     case 9:
-                        player.tweener.clear();
-                        player.tweener.moveBy(0, dis, spd);
+                        player.tweener.clear().moveBy(0, dis, spd);
                         break;
                     case 10:
-                        player.tweener.clear();
-                        player.tweener.moveBy(-dis, 0, spd);
+                        player.tweener.clear().moveBy(-dis, 0, spd);
                         break;
                     case 11:
-                        player.tweener.clear();
-                        player.tweener.moveBy(0, -dis, spd);
+                        player.tweener.clear().moveBy(0, -dis, spd);
                         break;
 
                     //ゴール地点用パネル
@@ -491,27 +487,31 @@ phina.define("phinaApp.MainScene", {
                 miss = true;
             }
         }
+
         //ミス！！
         if (miss) {
             player.action("miss");
             this.stop = true;
             var that = this;
-            var lb = phina.display.Label("ミス！！", this.labelParam).addChildTo(this);
-            lb.setPosition(SC_W/2, -SC_H/2);
-            lb.fontFamily = "KS-Kohichi";
-            lb.align     = "center";
-            lb.baseline  = "middle";
-            lb.fontSize = 60;
-            lb.outlineWidth = 2;
-            lb.tweener.clear();
-            lb.tweener.move(SC_W/2, SC_H/2, 1000, "easeOutBounce").wait(1000).fadeOut(100);
-            lb.tweener.call(function(){lb.remove();});
-            this.mask.tweener.clear().wait(3000).fadeIn(500).wait(1000).call(function(){that.restartStage();});
+            var lb = phina.display.Label("ミス！！", this.labelParam)
+                .addChildTo(this)
+                .setPosition(SC_W/2, -SC_H/2);
+            lb.tweener.clear()
+                .move(SC_W/2, SC_H/2, 1000, "easeOutBounce")
+                .wait(1000)
+                .fadeOut(100)
+                .call(function(){lb.remove();});
+            this.mask.tweener.clear()
+                .wait(3000)
+                .fadeIn(500)
+                .wait(1000)
+                .call(function(){that.restartStage();});
             app.playSE("miss");
             this.retryStage = true;
         } else {
             if (passPanel) passPanel.onPlayer = false;
         }
+
         //ゴール！
         if (goal) {
             player.action("goal");
@@ -525,7 +525,11 @@ phina.define("phinaApp.MainScene", {
                 .wait(1000)
                 .fadeOut(100)
                 .call(function(){lb.remove();});
-            this.mask.tweener.clear().wait(7000).fadeIn(500).wait(1000).call(function(){that.restartStage();});
+            this.mask.tweener.clear()
+                .wait(7000)
+                .fadeIn(500)
+                .wait(1000)
+                .call(function(){that.restartStage();});
             this.stageNumber++;
             this.retryStage = false;
         }
@@ -549,8 +553,7 @@ phina.define("phinaApp.MainScene", {
         var p = this.checkScreenPanel(sx, sy);
         if (p) {
             p.select = true;
-//            p.tweener.clear().to({scale: 0.9}, 100);
-            p.setScale(0.9);
+            p.tweener.clear().to({scaleX: 0.9, scaleY: 0.9}, 100);
             p.remove().addChildTo(this.panelLayer); //一番手前に持ってくる
             this.selectPanel = p;
             
