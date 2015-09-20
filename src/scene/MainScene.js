@@ -58,7 +58,29 @@ phina.define("phinaApp.MainScene", {
         //経過時間
         time: 0,
 
-        labelParam: {fontSize: 128, fontFamily: "Orbitron-Regular"},
+        labelParam: {
+            color: "white",
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 3,
+
+            fontFamily: "KS-Kohichi",
+            align: "center",
+            baseline: "middle",
+            fontSize: 20
+        },
+        scorelabelParam: {
+            color: "white",
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 3,
+
+            fontFamily: "KS-Kohichi",
+            align: "center",
+            baseline: "middle",
+            fontSize: 20,
+            align: "left",
+        },
     },
 
     init: function() {
@@ -78,10 +100,10 @@ phina.define("phinaApp.MainScene", {
             .setPosition(SC_W*0.5, SC_H*0.5)
 
         //レイヤー準備
-        this.lowerLayer = phina.app.Object2D().addChildTo(this);
-        this.panelLayer = phina.app.Object2D().addChildTo(this);
-        this.playerLayer = phina.app.Object2D().addChildTo(this);
-        this.itemLayer = phina.app.Object2D().addChildTo(this);
+        this.lowerLayer = phina.display.CanvasElement().addChildTo(this);
+        this.panelLayer = phina.display.CanvasElement().addChildTo(this);
+        this.playerLayer = phina.display.CanvasElement().addChildTo(this);
+        this.itemLayer = phina.display.CanvasElement().addChildTo(this);
 
         //プレイヤー準備        
         this.player = phinaApp.Player()
@@ -91,7 +113,7 @@ phina.define("phinaApp.MainScene", {
 
         //スコア表示
         var that = this;
-        var lb = this.scoreLabel = phina.display.Label("得点:", this.labelParam)
+        var lb = this.scoreLabel = phina.display.Label("得点:", this.scorelabelParam)
             .addChildTo(this)
             .setPosition(8, 32);
         lb.update = function() {
@@ -101,7 +123,7 @@ phina.define("phinaApp.MainScene", {
         //目隠し
         this.mask = phina.display.RectangleShape(param)
             .addChildTo(this)
-            .setPosition(SC_W*0.5, SC_H*0.5)
+            .setPosition(SC_W*0.5, SC_H*0.5);
     },
     
     update: function(app) {
@@ -121,6 +143,7 @@ phina.define("phinaApp.MainScene", {
 
         this.time++;
     },
+
     //ステージ初期化
     initStage: function() {
         //ステージデータコピー
@@ -212,21 +235,27 @@ phina.define("phinaApp.MainScene", {
 
         //スタートメッセージ
         var that = this;
-        var lb = phina.display.Label("３", {fontSize: 128, fontFamily: "Azuki"}).addChildTo(this);
+        var param = {
+            color: "white",
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 5,
+
+            fontFamily: "KS-Kohichi",
+            align: "center",
+            baseline: "middle",
+            fontSize: 60,
+        };
+        var lb = phina.display.Label("３", param).addChildTo(this);
         lb.setPosition(SC_W/2, -SC_H/2);
-        lb.fontFamily = "KS-Kohichi";
-        lb.align     = "center";
-        lb.baseline  = "middle";
-        lb.fontSize = 60;
-        lb.tweener.clear();
-        lb.tweener.wait(600);
-        lb.tweener.call(function(){lb.text = "３";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
-        lb.tweener.call(function(){lb.text = "２";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
-        lb.tweener.call(function(){lb.text = "１";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
-        lb.tweener.call(function(){lb.text = "スタート！";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100);
-        lb.tweener.call(function(){that.start = true;});
-        lb.tweener.wait(200);
-        lb.tweener.to({x: SC_W/2, y: SC_H/2}, 500, "easeOutQuint").to({alpha:0}, 200).call(function(){lb.remove();});
+        lb.tweener.clear().wait(600)
+            .call(function(){lb.text = "３";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100)
+            .call(function(){lb.text = "２";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100)
+            .call(function(){lb.text = "１";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100)
+            .call(function(){lb.text = "スタート！";}).to({x: SC_W/2, y: -SC_H/2, alpha:1}, 1).to({x: SC_W/2, y: SC_H/2}, 600, "easeOutBounce").wait(100).to({alpha:0}, 100)
+            .call(function(){that.start = true;})
+            .wait(200)
+            .to({x: SC_W/2, y: SC_H/2}, 500, "easeOutQuint").to({alpha:0}, 200).call(function(){lb.remove();});
     },
 
     //ステージ再スタート
@@ -325,7 +354,7 @@ phina.define("phinaApp.MainScene", {
 
         if (point > 0) {
             this.score += point;
-            var lb = phina.display.Label(""+point, {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this.itemLayer);
+            var lb = phina.display.Label(""+point, this.labelParam).addChildTo(this.itemLayer);
             lb.setPosition(p.x, p.y-30);
             lb.fontFamily = "KS-Kohichi";
             lb.align     = "center";
@@ -467,7 +496,7 @@ phina.define("phinaApp.MainScene", {
             player.action("miss");
             this.stop = true;
             var that = this;
-            var lb = phina.display.Label("ミス！！", {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this);
+            var lb = phina.display.Label("ミス！！", this.labelParam).addChildTo(this);
             lb.setPosition(SC_W/2, -SC_H/2);
             lb.fontFamily = "KS-Kohichi";
             lb.align     = "center";
@@ -488,16 +517,14 @@ phina.define("phinaApp.MainScene", {
             player.action("goal");
             this.stop = true;
             var that = this;
-            var lb = phina.display.Label("ゴール！！", {fontSize: 30, fontFamily: "Azuki"}).addChildTo(this);
-            lb.setPosition(SC_W/2, -SC_H/2);
-            lb.fontFamily = "KS-Kohichi";
-            lb.align     = "center";
-            lb.baseline  = "middle";
-            lb.fontSize = 60;
-            lb.outlineWidth = 2;
-            lb.tweener.clear();
-            lb.tweener.move(SC_W/2, SC_H/2, 4000, "easeOutBounce").wait(1000).fadeOut(100);
-            lb.tweener.call(function(){lb.remove();});
+            var lb = phina.display.Label("ゴール！！", this.labelParam)
+                .addChildTo(this)
+                .setPosition(SC_W/2, -SC_H/2);
+            lb.tweener.clear()
+                .move(SC_W/2, SC_H/2, 4000, "easeOutBounce")
+                .wait(1000)
+                .fadeOut(100)
+                .call(function(){lb.remove();});
             this.mask.tweener.clear().wait(7000).fadeIn(500).wait(1000).call(function(){that.restartStage();});
             this.stageNumber++;
             this.retryStage = false;
@@ -516,15 +543,14 @@ phina.define("phinaApp.MainScene", {
 
     //タッチorクリック開始処理
     onpointstart: function(e) {
-        if (this.touchID > 0)return;
-        this.touchID = e.ID;
-        var sx = this.moveX = this.beforeX = e.pointing.x;
-        var sy = this.moveY = this.beforeY = e.pointing.y;
+        var sx = this.moveX = this.beforeX = e.pointer.x;
+        var sy = this.moveY = this.beforeY = e.pointer.y;
 
         var p = this.checkScreenPanel(sx, sy);
         if (p) {
             p.select = true;
-            p.tweener.clear().scale(0.9, 100);
+//            p.tweener.clear().to({scale: 0.9}, 100);
+            p.setScale(0.9);
             p.remove().addChildTo(this.panelLayer); //一番手前に持ってくる
             this.selectPanel = p;
             
@@ -536,9 +562,8 @@ phina.define("phinaApp.MainScene", {
 
     //タッチorクリック移動処理
     onpointmove: function(e) {
-        if (this.touchID != e.ID) return;
-        var sx = this.moveX = e.pointing.x;
-        var sy = this.moveY = e.pointing.y;
+        var sx = this.moveX = e.pointer.x;
+        var sy = this.moveY = e.pointer.y;
         if (this.selectPanel) {
             var p = this.selectPanel;
             //パネルが領域外に行かない様に制限
@@ -569,8 +594,6 @@ phina.define("phinaApp.MainScene", {
 
     //タッチorクリック終了処理
     onpointend: function(e) {
-        if (this.touchID != e.ID) return;
-        this.touchID = -1;
         if (this.selectPanel) {
             var p = this.selectPanel;
             p.select = false;

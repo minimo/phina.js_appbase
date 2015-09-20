@@ -4675,7 +4675,7 @@ phina.namespace(function() {
     moveBy: function(x, y, duration, easing) {
       this._add({
         type: 'tween',
-        mode: 'from',
+        mode: 'by',
         props: {x: x, y: y},
         duration: duration,
         easing: easing,
@@ -4845,8 +4845,11 @@ phina.namespace(function() {
         if (task.mode === 'to') {
           this._tween.to(this.target, task.props, task.duration, task.easing);
         }
-        else {
+        else if (task.mode === 'from') {
           this._tween.from(this.target, task.props, task.duration, task.easing);
+        }
+        else {
+          this._tween.by(this.target, task.props, task.duration, task.easing);
         }
         this._update = this._updateTween;
         this._update(app);
@@ -4991,11 +4994,18 @@ phina.namespace(function() {
 
       this.ss = phina.asset.AssetManager.get('spritesheet', ss);
       this.paused = true;
+      this.finished = false;
     },
 
     update: function() {
       if (this.paused) return ;
       if (!this.currentAnimation) return ;
+
+      if (this.finished) {
+        this.finished = false;
+        this.currentFrameIndex = 0;
+        return ;
+      }
 
       ++this.frame;
       if (this.frame%this.currentAnimation.frequency === 0) {
@@ -5035,7 +5045,9 @@ phina.namespace(function() {
             return ;
           }
           else {
-            // TODO: 
+            this.pause = true;
+            this.finished = true;
+            return ;
           }
         }
       }
@@ -6015,7 +6027,7 @@ phina.namespace(function() {
   phina.define('phina.display.Sprite', {
     superClass: 'phina.display.CanvasElement',
 
-    init: function(image) {
+    init: function(image, width, height) {
       this.superInit();
 
       if (typeof image === 'string') {
@@ -6023,8 +6035,9 @@ phina.namespace(function() {
       }
       
       this.image = image;
-      this.width = this.image.domElement.width;
-      this.height = this.image.domElement.height;
+      this.width = width || this.image.domElement.width;
+      this.height = height || this.image.domElement.height;
+      this._frameIndex = 0;
 
       this.srcRect = {
         x: 0,
@@ -6068,6 +6081,16 @@ phina.namespace(function() {
       this._frameIndex = index;
 
       return this;
+    },
+
+    _access: {
+      frameIndex: {
+        get: function() {return this._frameIndex;},
+        set: function(idx) {
+          this.setFrameIndex(idx);
+          return this;
+        }
+      },
     },
   });
 
@@ -6255,6 +6278,7 @@ phina.namespace(function() {
   phina.define('phina.display.Layer', {
     superClass: 'phina.display.CanvasElement',
 
+
     init: function(params) {
       this.superInit();
       this.canvas = phina.graphics.Canvas();
@@ -6264,11 +6288,18 @@ phina.namespace(function() {
       });
       this.canvas.width  = params.width;
       this.canvas.height = params.height;
+
+      this.renderer = phina.display.CanvasRenderer(this.canvas);
     },
 
     draw: function(canvas) {
-      var c = this.currentScene.canvas;
-      this.canvas.context.drawImage(c.domElement, 0, 0, c.width, c.height);
+      this.renderer.render(this);
+
+      var image = this.canvas.domElement;
+      canvas.context.drawImage(image,
+        0, 0, image.width, image.height,
+        -this.width*this.originX, -this.height*this.originY, this.width, this.height
+        );
     },
   });
 });
@@ -6334,9 +6365,20 @@ phina.namespace(function() {
       }
       
       this._context.save();
-      this.renderObject(scene);
+      this.renderChildren(scene);
       this._context.restore();
     },
+    
+    renderChildren: function(obj) {
+      // 子供たちも実行
+      if (obj.children.length > 0) {
+        var tempChildren = obj.children.slice();
+        for (var i=0,len=tempChildren.length; i<len; ++i) {
+          this.renderObject(tempChildren[i]);
+        }
+      }
+    },
+
     renderObject: function(obj) {
       if (obj.visible === false) return ;
 
@@ -6377,15 +6419,15 @@ phina.namespace(function() {
 
         // 子供たちも実行
         if (obj.childrenVisible && obj.children.length > 0) {
-            var tempChildren = obj.children.slice();
-            for (var i=0,len=tempChildren.length; i<len; ++i) {
-                this.renderObject(tempChildren[i]);
-            }
+          var tempChildren = obj.children.slice();
+          for (var i=0,len=tempChildren.length; i<len; ++i) {
+            this.renderObject(tempChildren[i]);
+          }
         }
 
       }
-      
     },
+
   });
 
 });

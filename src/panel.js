@@ -34,7 +34,17 @@ phina.define("phinaApp.Panel", {
         scene: null,
 
         //ラベル用パラメータ
-        labelParam: {fontFamily: "KS-Kohichi", align: "center", baseline: "middle", fontSize: 20},
+        labelParam: {
+            color: "white",
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 3,
+
+            fontFamily: "KS-Kohichi",
+            align: "center",
+            baseline: "middle",
+            fontSize: 20
+        },
     },
 
     init: function() {
@@ -101,7 +111,7 @@ phina.define("phinaApp.Panel", {
         this.scene.passPanel++;
         this.scene.passPanelTotal++;
 
-        var lb = phina.display.Label("1000", labelParam)
+        var lb = phina.display.Label("1000", this.labelParam)
             .addChildTo(this.scene)
             .setPosition(this.x, this.y);
         lb.tweener.moveBy(0,-30, 1500,"easeOutQuad").fadeOut(500).call(function(){lb.remove();});

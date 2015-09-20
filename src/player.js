@@ -83,15 +83,15 @@ phina.define("phinaApp.Player", {
             case "goal":
                 var that = this;
                 this.tweener.call(function(){that.special = true; that.anim.gotoAndPlay("move"); that.nowAnimation = "move";});
-                this.tweener.from({x: 0, y: -20},200,"easeOutQuint").from({x: 0, y: 20},150,"easeOutQuint").wait(300);
-                this.tweener.from({x: 0, y: -20},200,"easeOutQuint").from({x: 0, y: 20},150,"easeOutQuint").wait(300);
-                this.tweener.from({x: 0, y: -20},200,"easeOutQuint").from({x: 0, y: 20},150,"easeOutQuint").wait(300);
+                this.tweener.moveBy(0, -20, 200,"easeOutQuint").moveBy(0, 20 ,150,"easeOutQuint").wait(300);
+                this.tweener.moveBy(0, -20, 200,"easeOutQuint").moveBy(0, 20 ,150,"easeOutQuint").wait(300);
+                this.tweener.moveBy(0, -20, 200,"easeOutQuint").moveBy(0, 20 ,150,"easeOutQuint").wait(300);
                 break;
             case "miss":
                 this.special = true;
                 this.anim.gotoAndPlay("miss");
                 this.nowAnimation = "miss";
-                this.tweener.clear().from({x: 0, y: -20},200,"easeOutQuint").from({x: 0, y: 20},150,"easeOutQuint");
+                this.tweener.clear().moveBy(0, -20, 200,"easeOutQuint").moveBy(0, 20, 150,"easeOutQuint");
                 break
         }
     },
@@ -112,7 +112,7 @@ phina.define("phinaApp.Egg", {
         this.anim.gotoAndPlay("enter");
     },
     update: function() {
-        if (this.paused) {
+        if (this.anim.paused) {
             this.remove();
             this.finished = true;
             this.player.visible = true;
