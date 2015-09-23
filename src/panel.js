@@ -8,7 +8,7 @@
 phina.define("phinaApp.Panel", {
     superClass: "phina.display.Sprite",
 
-    _static: {
+    _member: {
         //選択中フラグ
         select: false,
     
@@ -50,7 +50,7 @@ phina.define("phinaApp.Panel", {
     init: function() {
         //親クラスの初期化
         this.superInit("panel", PN_W, PN_H);
-        this.$extend(this._static);
+        this.$extend(this._member);
 
         this.id = -1;
         this.pattern = 1;

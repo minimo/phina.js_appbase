@@ -2920,6 +2920,21 @@ phina.namespace(function() {
       return this;
     },
 
+    stop: function() {
+      this.source.stop();
+      return this;
+    },
+
+    pause: function() {
+      // TODO
+      return this;
+    },
+
+    resume: function() {
+      // TODO
+      return this;
+    },
+
     // 試してみるなう
     _oscillator: function(type) {
       var context = this.context;

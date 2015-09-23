@@ -13,13 +13,13 @@ phina.define("phinaApp.Application", {
 
 	_static: {
         version: "0.0.1",
+    },
 
+    _member: {
         //ＢＧＭ＆効果音
         bgm: null,
         bgmIsPlay: false,
         sounds: null,
-        volumeBGM: 1,
-        volumeSE: 1,
 
         //バックグラウンドカラー
         backgroundColor: 'rgba(0, 0, 0, 1)',
@@ -27,13 +27,18 @@ phina.define("phinaApp.Application", {
 
     init: function(param) {
         this.superInit(param);
-        this.$extend(this._static);
+        this.$extend(this._member);
 
         //設定情報の読み込み
         this.loadConfig();
+ 
+        this.soundset = phina.extension.SoundSet();
+        this.volumeBGM = 1;
+        this.volumeSE = 1;
     },
 
     _onLoadAssets: function() {
+        this.soundset.readAsset();
     },
 
     //設定データの保存
@@ -47,17 +52,19 @@ phina.define("phinaApp.Application", {
     },
 
     playBGM: function(asset) {
+        this.soundset.playBGM(asset);
     },
 
     setVolumeBGM: function(vol) {
-
+        this.soundset.setVolumeBGM(vol);
     },
 
     playSE: function(asset) {
+        this.soundset.playSE(asset);
     },
 
     setVolumeSE: function(vol) {
-
+        this.soundset.setVolumeSE(vol);
     },
 
     _accessor: {

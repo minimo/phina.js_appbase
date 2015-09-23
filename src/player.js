@@ -9,7 +9,7 @@
 phina.define("phinaApp.Player", {
     superClass: "phina.display.Sprite",
 
-    _static: {
+    _member: {
         //プレイヤーの現在マップ座標    
         mapX: -1,
         mapY: -1,
@@ -24,7 +24,7 @@ phina.define("phinaApp.Player", {
     init: function() {
         //親クラスの初期化
         this.superInit("player");
-        this.$extend(this._static);
+        this.$extend(this._member);
 
         this.origin.y = 0.9;
 

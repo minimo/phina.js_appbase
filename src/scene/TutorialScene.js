@@ -9,7 +9,7 @@
 phina.define("phinaApp.TutorialScene", {
     superClass: phina.app.Scene,
     
-    _static: {
+    _member: {
         page: 0,
         maxPage: 1,
 
@@ -19,7 +19,7 @@ phina.define("phinaApp.TutorialScene", {
 
     init: function(stageNumber) {
         this.superInit();
-        this.$extend(this._static);
+        this.$extend(this._member);
 
         this.background = "rgba(0, 0, 0, 0.0)";
 

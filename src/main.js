@@ -38,6 +38,7 @@ window.onload = function() {
             width: SC_W,
             height: SC_H,
         });
+        app._onLoadAssets();
         app.replaceScene(phinaApp.MainScene());
         app.enableStats();
         app.run();

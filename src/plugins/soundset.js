@@ -6,27 +6,28 @@
  *
  */
 
-tm.extension = tm.extension || {};
+phina.extension = phina.extension || {};
 
 //サウンド管理
-tm.define("tm.extension.SoundSet", {
-
-    elements: null,
-
-    bgm: null,
-    bgmIsPlay: false,
-
-    volumeBGM: 5,
-    volumeSE: 5,
+phina.define("phina.extension.SoundSet", {
+    _member: {
+        elements: null,
+        bgm: null,
+        bgmIsPlay: false,
+        volumeBGM: 5,
+        volumeSE: 5,
+    },
 
     init: function() {
+        this.$extend(this._member);
         this.elements = [];
     },
 
     readAsset: function() {
-        for (var key in tm.asset.Manager.assets) {
-            var obj = tm.asset.Manager.get(key);
-            if (obj instanceof tm.sound.WebAudio) this.add(key);
+//      this.image = phina.asset.AssetManager.get('sound', image);
+        for (var key in phina.asset.AssetManager.assets.sound) {
+            var obj = phina.asset.AssetManager.get("sound", key);
+            if (obj instanceof phina.asset.Sound) this.add(key);
         }
     },
 
@@ -34,13 +35,14 @@ tm.define("tm.extension.SoundSet", {
         if (name === undefined) return null;
         url = url || null;
 
-        var e = tm.Extension.SoundElement(name);
+        var e = phina.extension.SoundElement(name);
         if (!e.media) return false;
         this.elements.push(e);
         return true;
     },
 
     find: function(name) {
+        if (!this.elements) return null;
         for (var i = 0; i < this.elements.length; i++) {
             if (this.elements[i].name == name) return this.elements[i];
         }
@@ -124,18 +126,20 @@ tm.define("tm.extension.SoundSet", {
 });
 
 //SoundElement Basic
-tm.define("tm.Extension.SoundElement", {
-
-    name: null,
-    url: null,
-    media: null,
-    volume: 10,
-    status: null,
-    message: null,
+phina.define("phina.extension.SoundElement", {
+    _member: {
+        name: null,
+        url: null,
+        media: null,
+        volume: 10,
+        status: null,
+        message: null,
+    },
 
     init: function(name) {
+        this.$extend(this._member);
         this.name = name;
-        this.media = tm.asset.AssetManager.get(name);
+        this.media = phina.asset.AssetManager.get("sound", name);
         if (!this.media) {
             console.warn("asset not found. "+name);
         }

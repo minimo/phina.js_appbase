@@ -8,7 +8,7 @@
 phina.define("phinaApp.MainScene", {
     superClass: 'phina.display.CanvasScene',
 
-    _static: {
+    _member: {
         //エンドレスモード
         endless: false,
     
@@ -85,7 +85,7 @@ phina.define("phinaApp.MainScene", {
 
     init: function() {
         this.superInit();
-        this.$extend(this._static);
+        this.$extend(this._member);
 
         //バックグラウンド
         var param = {
@@ -146,6 +146,13 @@ phina.define("phinaApp.MainScene", {
 
     //ステージ初期化
     initStage: function() {
+        if (this.selectPanel) {
+            var p = this.selectPanel;
+            p.select = false;
+            p.reverse();
+            this.selectPanel = null;
+        }
+
         //ステージデータコピー
         this.stageData = phinaApp.stageData[this.stageNumber-1];
 
