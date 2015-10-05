@@ -59,7 +59,7 @@ phina.define("phinaApp.MainScene", {
         time: 0,
 
         labelParam: {
-            color: "white",
+            fill: "white",
             stroke: true,
             strokeColor: 'black',
             strokeWidth: 3,
@@ -70,7 +70,7 @@ phina.define("phinaApp.MainScene", {
             fontSize: 20
         },
         scorelabelParam: {
-            color: "white",
+            fill: "white",
             stroke: true,
             strokeColor: 'black',
             strokeWidth: 3,
@@ -91,7 +91,7 @@ phina.define("phinaApp.MainScene", {
         var param = {
             width:SC_W,
             height:SC_H,
-            color: 'black',
+            fill: 'black',
             stroke: false,
             backgroundColor: 'transparent',
         };
@@ -504,7 +504,7 @@ phina.define("phinaApp.MainScene", {
                 .addChildTo(this)
                 .setPosition(SC_W/2, -SC_H/2);
             lb.tweener.clear()
-                .move(SC_W/2, SC_H/2, 1000, "easeOutBounce")
+                .moveTo(SC_W/2, SC_H/2, 1000, "easeOutBounce")
                 .wait(1000)
                 .fadeOut(100)
                 .call(function(){lb.remove();});
