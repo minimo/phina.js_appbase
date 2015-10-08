@@ -35,7 +35,7 @@ phina.define("phinaApp.Panel", {
 
         //ラベル用パラメータ
         labelParam: {
-            color: "white",
+            fill: "white",
             stroke: true,
             strokeColor: 'black',
             strokeWidth: 3,

@@ -7664,7 +7664,7 @@ phina.namespace(function() {
     init: function(options) {
       if (typeof arguments[0] === 'string') {
         options = { text: arguments[0], };
-        if (arguments[1]) {
+        if (typeof arguments[1] === 'object') {
             options.$safe(arguments[1]);
         }
       }

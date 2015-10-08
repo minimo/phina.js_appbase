@@ -243,7 +243,7 @@ phina.define("phinaApp.MainScene", {
         //スタートメッセージ
         var that = this;
         var param = {
-            color: "white",
+            fill: "white",
             stroke: true,
             strokeColor: 'black',
             strokeWidth: 5,
